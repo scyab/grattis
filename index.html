@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>🎉 Grattis – du har vunnit!</title>
+<meta name="description" content="Du är dagens utvalda vinnare. Hämta ditt pris innan tiden går ut!">
+<meta name="robots" content="noindex, nofollow">
+<meta property="og:title" content="🎉 Grattis – du har vunnit!">
+<meta property="og:description" content="Du är dagens utvalda vinnare. Hämta ditt pris innan tiden går ut!">
+<meta name="theme-color" content="#c3218f">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%81%3C/text%3E%3C/svg%3E">
+<style>
+  :root {
+    --violet: #5b1bd6; --magenta: #c3218f; --orange: #ff7a3d; --gold: #ffd23d;
+    --ink: #050805; --g: #39ff6a; --g2: #a8ffbf; --red: #ff2e63; --cyan: #00e5ff;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    min-height: 100vh; min-height: 100svh;
+    font-family: var(--sans); color: #fff; background: var(--ink);
+    overflow-x: hidden; -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ---------- backdrop ---------- */
+  .bg {
+    position: fixed; inset: 0; z-index: -3; overflow: hidden;
+    background: linear-gradient(165deg, var(--violet) 0%, var(--magenta) 48%, var(--orange) 82%, var(--gold) 100%);
+  }
+  .bg::before {
+    content: ""; position: absolute; left: 50%; top: 40%;
+    width: 220vmax; height: 220vmax; margin: -110vmax 0 0 -110vmax;
+    background: repeating-conic-gradient(rgba(255,255,255,.14) 0deg 9deg, transparent 9deg 18deg);
+    -webkit-mask-image: radial-gradient(circle, #000 0, transparent 38%);
+            mask-image: radial-gradient(circle, #000 0, transparent 38%);
+    animation: spin 40s linear infinite;
+  }
+  .bg::after { content: ""; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 40%, rgba(255,240,180,.35), transparent 55%); }
+  body.hacked .bg { opacity: 0; }
+  #fx { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -2; pointer-events: none; }
+  body.hacked #fx { opacity: .3; }
+  #flash {
+    position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: 0;
+    background-image: repeating-linear-gradient(0deg, rgba(0,0,0,.35) 0 2px, transparent 2px 4px);
+  }
+  #flash.zap { animation: zap .45s steps(1, end); }
+
+  .stage {
+    position: relative; max-width: 540px; margin: 0 auto;
+    min-height: 100vh; min-height: 100svh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;
+    text-align: center;
+    padding: max(28px, env(safe-area-inset-top)) 16px max(28px, env(safe-area-inset-bottom));
+  }
+
+  /* ---------- phase 1: the "prize" ---------- */
+  .ribbon {
+    font-size: 12px; font-weight: 800; letter-spacing: .18em; text-transform: uppercase; color: var(--gold);
+    padding: 7px 14px; border-radius: 999px; background: rgba(40,0,60,.35); border: 1px solid rgba(255,230,140,.55);
+    animation: drop .6s .1s both;
+  }
+  .grattis {
+    font-size: clamp(58px, 19vw, 108px); font-weight: 900; line-height: .95; letter-spacing: -.035em; padding: 0 .05em;
+    background: linear-gradient(180deg, #fffbe0 0%, #ffe066 40%, #ffb02e 75%, #ff7a3d 100%);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+    filter: drop-shadow(0 4px 0 #7a0f4d) drop-shadow(0 14px 28px rgba(40,0,40,.45));
+    animation: pop .8s .2s cubic-bezier(.2,1.7,.35,1) both, wobble 3s 1.2s ease-in-out infinite;
+  }
+  .lead { font-size: clamp(22px, 6.6vw, 32px); font-weight: 800; text-shadow: 0 2px 12px rgba(60,0,60,.4); animation: rise .6s .7s both; }
+  .dots { display: inline-block; animation: blink 1s steps(2) infinite; }
+  .gift { position: relative; font-size: clamp(84px, 27vw, 136px); line-height: 1; margin: 4px 0; animation: rise .6s 1s both; }
+  .gift span { display: inline-block; transform-origin: 50% 90%; animation: jiggle 1.6s 1.6s infinite; }
+  .gift::before {
+    content: ""; position: absolute; inset: -22%; z-index: -1;
+    background: radial-gradient(circle, rgba(255,240,170,.85) 0, rgba(255,200,80,.35) 35%, transparent 65%);
+    animation: glow 1.6s ease-in-out infinite;
+  }
+  .claim { width: 100%; max-width: 360px; animation: rise .6s 1.2s both; }
+  .bar {
+    height: 16px; border-radius: 999px; overflow: hidden;
+    background: rgba(40,0,50,.35); border: 2px solid rgba(255,255,255,.75); box-shadow: inset 0 2px 4px rgba(0,0,0,.3);
+  }
+  #bar {
+    display: block; height: 100%; width: 0; border-radius: inherit;
+    background: repeating-linear-gradient(-45deg, #fff1a1 0 10px, #ffd23d 10px 20px);
+    background-size: 28.28px 28.28px; animation: stripes .7s linear infinite;
+  }
+  .bar-label { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; font-size: 14px; font-weight: 700; text-align: left; text-shadow: 0 1px 6px rgba(60,0,60,.4); }
+  #pct { font-variant-numeric: tabular-nums; }
+  .cta {
+    appearance: none; -webkit-appearance: none; border: 0; cursor: pointer;
+    width: 100%; max-width: 360px; margin-top: 4px; padding: 18px 24px; border-radius: 999px;
+    font: 900 clamp(18px, 5.4vw, 22px)/1 var(--sans); letter-spacing: .03em; text-transform: uppercase;
+    color: #5a0b38; background: linear-gradient(180deg, #fffbd0 0%, #ffe066 45%, #ffb02e 100%);
+    box-shadow: 0 6px 0 #a8501a, 0 14px 30px rgba(50,0,40,.45);
+    animation: rise .6s 1.4s both, pulse 1.2s 2s ease-in-out infinite;
+  }
+  .cta:focus-visible { outline: 3px solid #fff; outline-offset: 4px; }
+  .cta:disabled { cursor: default; }
+  .timer { font-size: 14px; font-weight: 600; animation: rise .6s 1.6s both; }
+  .timer b {
+    display: inline-block; margin-left: 4px; padding: 3px 9px; border-radius: 6px;
+    background: #e0003c; font-variant-numeric: tabular-nums; animation: urgent 1s steps(2) infinite;
+  }
+  .fine { font-size: 11px; opacity: .75; animation: rise .6s 1.8s both; }
+
+  /* ---------- the glitch ---------- */
+  body.glitching #win { animation: tear 1.15s steps(1, end) forwards; }
+  body.glitching #win *:not(.grattis) { text-shadow: 3px 0 var(--red), -3px 0 var(--cyan) !important; }
+  body.glitching .bg { animation: bgflick 1.15s steps(1, end) forwards; }
+  body.glitching #flash { animation: flash 1.15s steps(1, end) forwards; }
+
+  /* ---------- phase 2: the hacker ---------- */
+  body.hacked::after {
+    content: ""; position: fixed; inset: 0; z-index: 50; pointer-events: none;
+    background:
+      repeating-linear-gradient(0deg, rgba(0,0,0,.22) 0 1px, transparent 1px 3px),
+      radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.6) 100%);
+  }
+  .hack { font-family: var(--mono); color: var(--g); animation: boot .5s both; }
+  .hack.jolt { animation: jolt .4s; }
+  .term {
+    width: 100%; text-align: left; overflow: hidden;
+    background: rgba(2,12,4,.85); border: 1px solid rgba(57,255,106,.35); border-radius: 10px;
+    box-shadow: 0 0 0 1px rgba(57,255,106,.06), 0 0 44px rgba(57,255,106,.14);
+    transition: opacity .4s, transform .4s, filter .4s;
+  }
+  .term.gone { opacity: 0; transform: scale(.96); filter: blur(4px); }
+  .term-head { display: flex; align-items: center; gap: 6px; padding: 9px 12px; border-bottom: 1px solid rgba(57,255,106,.2); font-size: 12px; color: rgba(57,255,106,.7); }
+  .term-head i { width: 10px; height: 10px; border-radius: 50%; background: #ff5f57; }
+  .term-head i:nth-child(2) { background: #febc2e; }
+  .term-head i:nth-child(3) { background: #28c840; }
+  .term-head em { margin-left: auto; font-style: normal; }
+  #log { padding: 12px 14px 16px; font-size: clamp(12px, 3.4vw, 14.5px); line-height: 1.6; min-height: 23em; }
+  .ln { display: flex; gap: 1ch; }
+  .ln .s { flex: none; white-space: pre; }
+  .ln .t { flex: 1; min-width: 0; white-space: pre-wrap; overflow-wrap: break-word; }
+  .ln:last-child .t::after { content: "█"; margin-left: 1px; animation: blink 1s steps(2) infinite; }
+  .s.ok { color: var(--g); } .s.warn { color: var(--red); } .s.wait { color: var(--cyan); }
+  .ln.cmd .t { color: #fff; }
+  .ln.warn .t { color: #ff8fa8; }
+  .k { color: rgba(57,255,106,.55); } .v { color: #e6ffec; }
+
+  .rv { display: flex; flex-direction: column; align-items: center; gap: 18px; width: 100%; }
+  .rv > * { opacity: 0; }
+  .rv .in { animation: rise .55s both; }
+  .r-pre { font-size: clamp(16px, 4.6vw, 20px); letter-spacing: .06em; color: var(--g2); }
+  .glitch {
+    position: relative; font-family: var(--mono); font-weight: 800; font-size: clamp(38px, 12.4vw, 72px);
+    line-height: 1; letter-spacing: -.02em; text-transform: uppercase; color: #fff;
+    text-shadow: 0 0 22px rgba(57,255,106,.55);
+  }
+  .glitch.in { animation: rise .55s both, jitter 3.4s 1.6s steps(1) infinite; }
+  .glitch::before, .glitch::after { content: attr(data-text); position: absolute; inset: 0; pointer-events: none; text-shadow: none; mix-blend-mode: screen; }
+  .glitch::before { color: var(--cyan); transform: translateX(-3px); animation: slice1 2.6s steps(1) infinite; }
+  .glitch::after { color: var(--red); transform: translateX(3px); animation: slice2 3.1s steps(1) infinite; }
+  .r-main { font-family: var(--sans); font-size: clamp(19px, 5.4vw, 25px); font-weight: 650; line-height: 1.35; color: #eafff0; max-width: 22ch; }
+  .r-main strong {
+    color: var(--g); font-weight: 850; border-radius: 4px;
+    background: rgba(57,255,106,.12); box-shadow: 0 0 0 .12em rgba(57,255,106,.12); text-shadow: 0 0 14px rgba(57,255,106,.5);
+  }
+  .flags { width: 100%; max-width: 400px; text-align: left; padding: 14px 16px; border: 1px dashed rgba(57,255,106,.4); border-radius: 10px; background: rgba(2,12,4,.7); }
+  .flags h3 { margin-bottom: 10px; font-size: 12px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--red); }
+  .flags ul { list-style: none; display: grid; gap: 8px; font: 14px/1.4 var(--sans); color: #d9ffe2; }
+  .flags li { display: flex; gap: 10px; opacity: 0; }
+  .flags li::before { content: "🚩"; flex: none; }
+  .flags li.ok::before { content: "✅"; }
+  .flags li.in { animation: flag .4s both; }
+  .flags .score { margin-top: 12px; font-size: 13px; color: var(--g); opacity: 0; }
+  .flags .score.in { animation: rise .5s both; }
+  .calm { font: 13px/1.45 var(--sans); color: rgba(200,255,215,.75); max-width: 36ch; }
+  .replay {
+    appearance: none; -webkit-appearance: none; cursor: pointer; padding: 11px 18px; border-radius: 8px;
+    font: 600 14px var(--mono); color: var(--g); background: transparent; border: 1px solid rgba(57,255,106,.6);
+  }
+  .replay:hover, .replay:focus-visible { background: rgba(57,255,106,.12); outline: none; }
+
+  /* ---------- keyframes ---------- */
+  @keyframes spin { to { transform: rotate(1turn); } }
+  @keyframes drop { from { opacity: 0; transform: translateY(-14px); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes pop { from { opacity: 0; transform: scale(.3) rotate(-8deg); } to { opacity: 1; transform: none; } }
+  @keyframes wobble { 0%, 100% { transform: rotate(-2deg); } 50% { transform: rotate(2deg) scale(1.04); } }
+  @keyframes blink { 50% { opacity: 0; } }
+  @keyframes jiggle {
+    0%, 60%, 100% { transform: none; } 65% { transform: rotate(-10deg) scale(1.05); } 70% { transform: rotate(9deg) scale(1.08); }
+    75% { transform: rotate(-7deg); } 80% { transform: rotate(5deg); } 85% { transform: rotate(-2deg); }
+  }
+  @keyframes glow { 50% { transform: scale(1.12); opacity: .75; } }
+  @keyframes stripes { to { background-position: 28.28px 0; } }
+  @keyframes pulse { 50% { transform: scale(1.04); box-shadow: 0 6px 0 #a8501a, 0 14px 40px rgba(255,220,120,.7); } }
+  @keyframes urgent { 50% { background: #8a0025; } }
+  @keyframes tear {
+    0%   { clip-path: inset(0); transform: none; filter: none; }
+    8%   { clip-path: inset(12% 0 58% 0); transform: translate(-14px, 2px) skewX(10deg); }
+    16%  { clip-path: inset(0); transform: translate(6px, 0); filter: invert(1) hue-rotate(90deg); }
+    24%  { clip-path: inset(48% 0 22% 0); transform: translate(16px, -2px); }
+    32%  { clip-path: inset(0); transform: none; filter: none; }
+    40%  { clip-path: inset(70% 0 6% 0); transform: translate(-18px, 0) skewX(-12deg); filter: hue-rotate(200deg) saturate(3); }
+    48%  { clip-path: inset(0); transform: scale(1.02); filter: invert(1); }
+    56%  { clip-path: inset(28% 0 44% 0); transform: translate(12px, 0); }
+    64%  { clip-path: inset(0); transform: translate(-4px, 0); filter: contrast(3) brightness(.6) hue-rotate(90deg); }
+    72%  { clip-path: inset(5% 0 80% 0); transform: translate(20px, 0); }
+    80%  { clip-path: inset(0); transform: scaleY(.6); filter: brightness(3); }
+    88%  { clip-path: inset(46% 0 46% 0); transform: scaleX(1.4); filter: brightness(4); }
+    100% { clip-path: inset(50% 0 50% 0); opacity: 0; }
+  }
+  @keyframes bgflick {
+    0% { filter: none; } 12% { filter: invert(1); } 20% { filter: none; } 36% { filter: hue-rotate(140deg) saturate(2); }
+    44% { filter: grayscale(1) brightness(.4); } 60% { filter: invert(1) hue-rotate(90deg); } 70% { filter: none; }
+    80% { filter: brightness(.2); } 100% { filter: brightness(0); opacity: 0; }
+  }
+  @keyframes flash {
+    0% { opacity: 0; } 6% { opacity: 1; background-color: rgba(255,255,255,.85); } 10% { opacity: 0; }
+    34% { opacity: 1; background-color: rgba(57,255,106,.25); } 40% { opacity: 0; }
+    62% { opacity: 1; background-color: rgba(255,46,99,.3); } 66% { opacity: 0; }
+    86%, 100% { opacity: 1; background-color: #050805; }
+  }
+  @keyframes zap { 0% { opacity: 1; background-color: rgba(57,255,106,.35); } 30% { opacity: 0; } 55% { opacity: .8; background-color: rgba(255,255,255,.35); } 100% { opacity: 0; } }
+  @keyframes boot { from { opacity: 0; filter: brightness(3) blur(2px); } to { opacity: 1; filter: none; } }
+  @keyframes jolt { 20% { transform: translate(-6px, 2px); } 40% { transform: translate(5px, -3px); } 60% { transform: translate(-3px, 1px); } 80% { transform: translate(2px, 0); } }
+  @keyframes jitter { 0%, 31%, 71%, 100% { transform: none; } 30% { transform: translate(2px, 0); } 70% { transform: translate(-2px, 1px) skewX(4deg); } }
+  @keyframes slice1 {
+    0%, 12%, 48%, 53%, 100% { clip-path: inset(0 0 100% 0); }
+    6% { clip-path: inset(18% 0 52% 0); } 9% { clip-path: inset(62% 0 8% 0); } 50% { clip-path: inset(40% 0 35% 0); }
+  }
+  @keyframes slice2 {
+    0%, 20%, 28%, 75%, 80%, 100% { clip-path: inset(0 0 100% 0); }
+    22% { clip-path: inset(70% 0 4% 0); } 25% { clip-path: inset(10% 0 70% 0); } 77% { clip-path: inset(30% 0 45% 0); }
+  }
+  @keyframes flag { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: none; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+  }
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"></div>
+<canvas id="fx" aria-hidden="true"></canvas>
+<div id="flash" aria-hidden="true"></div>
+
+<main id="win" class="stage">
+  <p class="ribbon">★ Officiell vinnare ★</p>
+  <h1 class="grattis">Grattis!</h1>
+  <p class="lead">Du har vunnit<span class="dots">…</span></p>
+  <div class="gift" aria-hidden="true"><span>🎁</span></div>
+  <div class="claim">
+    <div class="bar" role="progressbar" aria-label="Ditt pris laddas"><span id="bar"></span></div>
+    <p class="bar-label"><span id="barText">Packar upp ditt pris…</span><b id="pct">0%</b></p>
+  </div>
+  <button id="claimBtn" class="cta" type="button">Hämta mitt pris!</button>
+  <p class="timer">Erbjudandet går ut om <b id="countdown">00:59</b></p>
+  <p class="fine">Endast en vinnare idag – och det är du. Garanterat helt seriöst.</p>
+  <noscript><p class="lead">…en bakläxa! Nämligen att gå en helgkurs i INFO-säkerhet!</p></noscript>
+</main>
+
+<main id="hack" class="stage hack" hidden>
+  <div class="term">
+    <div class="term-head"><i></i><i></i><i></i><em>vinst.exe</em></div>
+    <div id="log" role="log" aria-live="polite"></div>
+  </div>
+  <section id="reveal" class="rv" hidden aria-live="polite">
+    <p class="r-pre">Du har vunnit…</p>
+    <h2 class="glitch" data-text="en bakläxa!">en bakläxa!</h2>
+    <p class="r-main">Nämligen att gå en <strong>helgkurs i INFO-säkerhet!</strong></p>
+    <div class="flags">
+      <h3>Varningsflaggor du precis sprang förbi</h3>
+      <ul>
+        <li>Du scannade en okänd QR-kod</li>
+        <li>Du ”vann” en tävling du aldrig var med i</li>
+        <li>En nedräkning försökte stressa dig</li>
+        <li id="flag4"></li>
+      </ul>
+      <p class="score" id="score"></p>
+    </div>
+    <p class="calm">🔒 Lugn – uppgifterna i loggen lästes bara av lokalt i din webbläsare. Inget skickades någonstans. Den här gången. 😉</p>
+    <button id="replay" class="replay" type="button">↻ Kör igen</button>
+  </section>
+</main>
+
+<script>
+(() => {
+  const $ = s => document.querySelector(s);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const state = { clicked: false, glitched: false, revealing: false };
+  let fast = false;
+  const sleep = ms => new Promise(r => setTimeout(r, fast ? Math.min(ms, 30) : ms));
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+
+  /* ---------- canvas: confetti, then matrix rain ---------- */
+  const cv = $('#fx'), ctx = cv.getContext('2d');
+  const COLORS = ['#ffd23d', '#ff3d7f', '#3dd6ff', '#7bff6a', '#ffffff', '#ff9a3d', '#b06bff'];
+  const GLYPHS = 'アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワン0123456789ÅÄÖ<>{}#$%';
+  let W = 0, H = 0, FS = 16, cols = [], lastTick = 0, mode = reduce ? 'off' : 'confetti';
+
+  function resize() {
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    W = innerWidth; H = innerHeight;
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    FS = W < 500 ? 14 : 16;
+    const n = Math.ceil(W / FS);
+    if (cols.length !== n) cols = Array.from({ length: n }, () => -Math.random() * H / FS | 0);
+  }
+  resize();
+  addEventListener('resize', resize);
+
+  const piece = fromTop => ({
+    x: Math.random() * W, y: fromTop ? -20 - Math.random() * 40 : -Math.random() * H,
+    w: 6 + Math.random() * 6, h: 9 + Math.random() * 9, vy: 1.4 + Math.random() * 2.4, vx: Math.random() * 1.2 - .6,
+    r: Math.random() * 6.3, vr: Math.random() * .3 - .15, s: Math.random() * 6.3, c: COLORS[Math.random() * COLORS.length | 0],
+  });
+  const confetti = Array.from({ length: W < 500 ? 70 : 120 }, () => piece(false));
+  const GLITCH_COLORS = ['#39ff6a', '#00e5ff', '#ff2e63'];
+
+  function frame(t) {
+    if (mode === 'confetti' || mode === 'glitch') {
+      const g = mode === 'glitch';
+      ctx.clearRect(0, 0, W, H);
+      for (const p of confetti) {
+        p.s += .05; p.y += p.vy * (g ? 3 : 1); p.x += p.vx + Math.sin(p.s) * .6; p.r += p.vr;
+        if (p.y > H + 20) Object.assign(p, piece(true));
+        ctx.save();
+        ctx.translate(p.x + (g ? (Math.random() - .5) * 30 : 0), p.y);
+        ctx.rotate(p.r);
+        ctx.fillStyle = g ? GLITCH_COLORS[Math.random() * 3 | 0] : p.c;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.cos(p.s * 1.7) ** 2 + 1);
+        ctx.restore();
+      }
+    } else if (mode === 'matrix' && t - lastTick > 55) {
+      lastTick = t;
+      ctx.fillStyle = 'rgba(5,8,5,.14)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.font = FS + 'px ui-monospace, Menlo, monospace';
+      for (let i = 0; i < cols.length; i++) {
+        const y = cols[i] * FS;
+        ctx.fillStyle = Math.random() < .05 ? '#e9ffee' : '#39ff6a';
+        ctx.fillText(GLYPHS[Math.random() * GLYPHS.length | 0], i * FS, y);
+        cols[i] = y > H && Math.random() > .97 ? 0 : cols[i] + 1;
+      }
+    }
+    if (mode !== 'off') requestAnimationFrame(frame);
+  }
+  if (mode !== 'off') requestAnimationFrame(frame);
+  function setMode(m) {
+    if (reduce) return;
+    mode = m;
+    if (m === 'matrix') ctx.clearRect(0, 0, W, H);
+  }
+
+  /* ---------- helpers ---------- */
+  const NOISE = '!<>-_\\/[]{}=+*^?#$%&ÅÄÖ01アカサタナ';
+  function scramble(el, text, ms) {
+    return new Promise(done => {
+      const t0 = performance.now();
+      (function step(now) {
+        const p = Math.min(1, Math.max(0, (now - t0) / ms));
+        const n = Math.floor(p * text.length);
+        let out = '';
+        for (let i = 0; i < text.length; i++) out += i < n || text[i] === ' ' ? text[i] : NOISE[Math.random() * NOISE.length | 0];
+        el.textContent = out;
+        if ('text' in el.dataset) el.dataset.text = out;
+        p < 1 ? requestAnimationFrame(step) : done();
+      })(t0);
+    });
+  }
+
+  // Everything here is read locally in the browser and never sent anywhere.
+  async function deviceInfo() {
+    const ua = navigator.userAgent, has = r => r.test(ua);
+    const device = has(/iPhone/) ? 'iPhone'
+      : has(/iPad/) || (has(/Macintosh/) && navigator.maxTouchPoints > 1) ? 'iPad'
+      : has(/Android/) ? (has(/Mobile/) ? 'Android-telefon' : 'Android-platta')
+      : has(/Macintosh/) ? 'Mac' : has(/Windows/) ? 'Windows-dator' : has(/CrOS/) ? 'Chromebook'
+      : has(/Linux/) ? 'Linux-burk (respekt)' : 'okänd pryl';
+    const browser = has(/FBAN|FBAV|Instagram|LinkedInApp|Snapchat|musical_ly|TikTok/i) ? 'app-webbläsare (modigt)'
+      : has(/SamsungBrowser/) ? 'Samsung Internet' : has(/EdgA?\/|EdgiOS/) ? 'Edge' : has(/OPR\/|OPT\//) ? 'Opera'
+      : has(/FxiOS|Firefox/) ? 'Firefox' : has(/CriOS|Chrome/) ? 'Chrome' : has(/Safari/) ? 'Safari' : 'något hemligt';
+    let tz = '';
+    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    let battery = '';
+    try {
+      if (navigator.getBattery) {
+        const b = await Promise.race([navigator.getBattery(), new Promise(r => setTimeout(r, 400))]);
+        if (b) battery = Math.round(b.level * 100) + ' %' + (b.charging ? ' (laddar)' : '');
+      }
+    } catch (e) {}
+    return { device, browser, screen: `${screen.width} × ${screen.height}`, lang: navigator.language || '??', tz, battery };
+  }
+  const infoP = deviceInfo();
+
+  /* ---------- phase 1: you're a winner! ---------- */
+  const win = $('#win'), hack = $('#hack');
+  const bar = $('#bar'), pct = $('#pct'), label = $('#barText'), btn = $('#claimBtn'), cd = $('#countdown');
+  let cdTimer;
+  function setBar(v, txt) { bar.style.width = v + '%'; pct.textContent = txt ?? v + '%'; }
+
+  function runWin() {
+    let secs = 59;
+    cdTimer = setInterval(() => { secs = Math.max(0, secs - 1); cd.textContent = '00:' + String(secs).padStart(2, '0'); }, 1000);
+    const t0 = performance.now() + 1300, dur = 3300;
+    (function tick(now) {
+      if (state.glitched) return;
+      const p = Math.min(1, Math.max(0, (now - t0) / dur));
+      setBar(Math.round(97 * (1 - (1 - p) ** 3)));
+      p < 1 ? requestAnimationFrame(tick) : stall();
+    })(performance.now());
+  }
+  async function stall() {
+    label.textContent = 'Nästan där…';
+    await sleep(800); if (state.glitched) return;
+    setBar(98);
+    await sleep(500); if (state.glitched) return;
+    label.textContent = 'Hmm…'; setBar(98, '9█%');
+    await sleep(600);
+    startGlitch();
+  }
+  btn.addEventListener('click', () => {
+    if (state.glitched) return;
+    state.clicked = true; btn.disabled = true; btn.textContent = 'Hämtar…';
+    try { navigator.vibrate && navigator.vibrate([25, 40, 25, 40, 120]); } catch (e) {}
+    setTimeout(startGlitch, 350);
+  });
+
+  /* ---------- the twist ---------- */
+  async function startGlitch() {
+    if (state.glitched) return;
+    state.glitched = true;
+    clearInterval(cdTimer);
+    scramble($('.grattis'), 'Gr4tt1s?!', 1000);
+    scramble(label, 'FEL: priset är inte vad du tror', 900);
+    setBar(100, 'ERR');
+    setMode('glitch');
+    document.body.classList.add('glitching');
+    await sleep(reduce ? 250 : 1150);
+    win.hidden = true; hack.hidden = false;
+    document.body.classList.replace('glitching', 'hacked');
+    $('meta[name="theme-color"]').content = '#050805';
+    scrollTo(0, 0);
+    setMode('matrix');
+    await runTerminal();
+    await showReveal();
+  }
+
+  /* ---------- phase 2: terminal ---------- */
+  const log = $('#log');
+  const STATUS = { ok: '[ OK ]', warn: '[ !! ]', wait: '[ .. ]', none: '      ' };
+  function el(parent, tag, cls, txt = '') {
+    const e = document.createElement(tag);
+    e.className = cls; e.textContent = txt; parent.appendChild(e);
+    return e;
+  }
+  async function type(node, txt, speed) {
+    for (let i = 1; i <= txt.length; i++) {
+      node.textContent = txt.slice(0, i);
+      if (!fast) await sleep(speed);
+    }
+  }
+  hack.addEventListener('click', () => { if (!state.revealing) fast = true; }); // tap to fast-forward
+
+  async function runTerminal() {
+    const d = await infoP;
+    const kv = (k, v) => v && { k, v };
+    const steps = [
+      { cmd: '$ ./hamta_pris.sh' },
+      { s: 'ok', t: 'Ansluter till vinstservern…' },
+      { s: 'ok', t: 'Kringgår brandväggen…' },
+      { s: 'ok', t: 'Läser av din enhet:' },
+      kv('enhet', d.device),
+      kv('webbläsare', d.browser),
+      kv('skärm', d.screen),
+      kv('språk', d.lang),
+      kv('plats', d.tz && d.tz.split('/').pop().replace(/_/g, ' ') + ' (typ)'),
+      kv('klockan', new Date().toLocaleTimeString('sv-SE')),
+      kv('batteri', d.battery),
+      { s: 'warn', t: 'Avvikelse: priset är inte vad det verkar', pause: 550 },
+      { s: 'wait', t: 'Dekrypterar pris ', bar: true },
+      { s: 'ok', t: 'Pris identifierat.', pause: 700 },
+    ].filter(Boolean);
+
+    await sleep(500);
+    for (const st of steps) {
+      if (st.cmd) {
+        const ln = el(log, 'div', 'ln cmd');
+        await type(el(ln, 'span', 't'), st.cmd, 45);
+        await sleep(350);
+        continue;
+      }
+      const ln = el(log, 'div', 'ln' + (st.s === 'warn' ? ' warn' : ''));
+      el(ln, 'span', 's ' + (st.s || ''), STATUS[st.s || 'none']);
+      const t = el(ln, 'span', 't');
+      if (st.k) {
+        el(t, 'span', 'k', (st.k + ' ').padEnd(13, '.') + ' ');
+        await type(el(t, 'span', 'v'), st.v, 18);
+        await sleep(90);
+      } else {
+        await type(t, st.t, 16);
+        if (st.bar) {
+          const b = el(t, 'span', 'v');
+          for (let i = 0; i <= 10; i++) {
+            b.textContent = '▓'.repeat(i) + '░'.repeat(10 - i) + ' ' + i * 10 + '%';
+            await sleep(80);
+          }
+        }
+        await sleep(st.pause ?? 220);
+      }
+    }
+  }
+
+  /* ---------- the reveal ---------- */
+  async function showReveal() {
+    state.revealing = true; fast = false;
+    await sleep(600);
+    const term = $('.term'), rv = $('#reveal');
+    term.classList.add('gone');
+    await sleep(420);
+    term.hidden = true; rv.hidden = false; scrollTo(0, 0);
+    const [pre, h2, main, flags, calm, replay] = rv.children;
+
+    pre.classList.add('in');
+    await sleep(650);
+    h2.classList.add('in');
+    await scramble(h2, 'en bakläxa!', reduce ? 10 : 1100);
+    hack.classList.add('jolt');
+    const flash = $('#flash'); flash.classList.add('zap');
+    setTimeout(() => flash.classList.remove('zap'), 500);
+    await sleep(450);
+    main.classList.add('in');
+    await sleep(1000);
+
+    const last = $('#flag4'), score = $('#score');
+    if (state.clicked) {
+      last.textContent = 'Du tryckte på den stora glittriga knappen. Klart du gjorde.';
+      score.textContent = '4 av 4 – fullt hus! 🏆';
+    } else {
+      last.textContent = 'Du tryckte inte på den glittriga knappen. Snyggt!';
+      last.classList.add('ok');
+      score.textContent = '3 av 4 – nästan godkänt. 😏';
+    }
+    flags.classList.add('in');
+    await sleep(350);
+    for (const li of flags.querySelectorAll('li')) { li.classList.add('in'); await sleep(320); }
+    score.classList.add('in');
+    await sleep(500);
+    calm.classList.add('in');
+    await sleep(250);
+    replay.classList.add('in');
+  }
+  $('#replay').addEventListener('click', e => { e.stopPropagation(); location.reload(); });
+
+  /* ---------- go (wait until the page is actually visible) ---------- */
+  function boot() {
+    if (document.hidden) return document.addEventListener('visibilitychange', boot, { once: true });
+    runWin();
+  }
+  boot();
+})();
+</script>
+</body>
+</html>
